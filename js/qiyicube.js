@@ -99,6 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 假设是魔方状态数据，可以在这里解码
     // decodeCubeData(data);
+	parseCubeData(msg);
   }
 
 
@@ -176,3 +177,36 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 
+function parseCubeData(msg) {
+		var locTime = $.now();
+		if (msg[0] != 0xfe) {
+			console.log('[qiyicube] error cube data', msg);
+		}
+		var opcode = msg[2];
+		var ts = (msg[3] << 24 | msg[4] << 16 | msg[5] << 8 | msg[6]);
+		if (opcode == 0x2) { // cube hello，不加这个会直报
+			batteryLevel = msg[35];
+			sendMessage(msg.slice(2, 7));
+
+			//初始化魔方
+			//var newFacelet = parseFacelet(msg.slice(7, 34));
+			//GiikerCube.callback(newFacelet, [], [Math.trunc(ts / 1.6), locTime], _deviceName);
+			//prevCubie.fromFacelet(newFacelet);
+			// if (newFacelet != kernel.getProp('giiSolved', mathlib.SOLVED_FACELET)) {
+			// 	var rst = kernel.getProp('giiRST');
+			// 	if (rst == 'a' || rst == 'p' && confirm(CONFIRM_GIIRST)) {
+			// 		giikerutil.markSolved();
+			// 	}
+			// }
+		} 
+		else if (opcode == 0x3) { // state change，魔方状态改变
+			sendMessage(msg.slice(2, 7));
+			console.log("kkkkkkkkkkkkkkkkkkk");
+		
+		
+		
+		
+		
+		
+		}
+}

@@ -169,19 +169,19 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 
-function parseCubeData(msg) {
+function parseCubeData(msg) {//蓝牙传来的原始数据包（Uint8Array）
 		var locTime = $.now();
 		if (msg[0] != 0xfe) {
 			console.log('[qiyicube] error cube data', msg);
 		}
-		var opcode = msg[2];
+		var opcode = msg[2];//操作码（消息类型）
 		var ts = (msg[3] << 24 | msg[4] << 16 | msg[5] << 8 | msg[6]);
-		if (opcode == 0x2) { // cube hello，不加这个会直报
-			batteryLevel = msg[35];
-			sendMessage(msg.slice(2, 7));
+		if (opcode == 0x2) { // cube hello，不加这个会直报,魔方上电/初始化（Hello 包）
+			batteryLevel = msg[35];//取出电池电量
+			sendMessage(msg.slice(2, 7));//向魔方回应一条消息：sendMessage(msg.slice(2,7))（通常是握手回应）
 
 			//初始化魔方
-			//var newFacelet = parseFacelet(msg.slice(7, 34));
+			//var newFacelet = parseFacelet(msg.slice(7, 34));//解析魔方面片颜色：parseFacelet(msg.slice(7, 34))→ 这表示从第 7~33 字节是面片颜色编码（共 27 *2=54字节）
 			//GiikerCube.callback(newFacelet, [], [Math.trunc(ts / 1.6), locTime], _deviceName);
 			//prevCubie.fromFacelet(newFacelet);
 			// if (newFacelet != kernel.getProp('giiSolved', mathlib.SOLVED_FACELET)) {
@@ -191,9 +191,9 @@ function parseCubeData(msg) {
 			// 	}
 			// }
 		} 
-		else if (opcode == 0x3) { // state change，魔方状态改变
-			sendMessage(msg.slice(2, 7));
-			console.log("kkkkkkkkkkkkkkkkkkk");
+		else if (opcode == 0x3) { // state change，魔方状态改变（转动事件）
+			sendMessage(msg.slice(2, 7));//向魔方回应一条消息：sendMessage(msg.slice(2,7))（通常是握手回应）,回应一下魔方以保持连接心跳
+			console.log("当前旋转动作：",[msg[34]);
 		
 		
 		

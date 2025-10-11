@@ -70,12 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // 🔹 数据处理函数
   function onCubeEvent(event) {
     const value = event.target.value;
+	//得到加密数据
     const encMsg = new Uint8Array(value.buffer);
-    // var encMsg = [];
-    // for (var i = 0; i < value.byteLength; i++) {
-    //   encMsg[i] = value.getUint8(i);
-    // }
-
 
     // 初始化 AES-128 解密器
     if (!decoder) {
@@ -83,22 +79,18 @@ document.addEventListener('DOMContentLoaded', () => {
       decoder = $.aes128(key); // 创建 AES-128 实例
     }
 
+	//解密msg
     var msg = [];
-		for (var i = 0; i < encMsg.length; i += 16) {
-			var block = encMsg.slice(i, i + 16);
-			decoder.decrypt(block);
-			for (var j = 0; j < 16; j++) {
-				msg[i + j] = block[j];
-			}
+	for (var i = 0; i < encMsg.length; i += 16) {
+		var block = encMsg.slice(i, i + 16);
+		decoder.decrypt(block);
+		for (var j = 0; j < 16; j++) {
+			msg[i + j] = block[j];
 		}
-		console.log('[qiyicube] decrypted msg', msg);
-    // 在这里解析或处理数据
-    // console.log('接收到数据:', encMsg);
-    // console.log('decoder:', decoder);
-   
+	}
+	console.log('[qiyicube] decrypted msg', msg);
 
-    // 假设是魔方状态数据，可以在这里解码
-    // decodeCubeData(data);
+	//处理解密后魔方状态的数据，
 	parseCubeData(msg);
   }
 

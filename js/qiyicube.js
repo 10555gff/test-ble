@@ -193,7 +193,7 @@ function parseCubeData(msg) {//蓝牙传来的原始数据包（Uint8Array）
 		} 
 		else if (opcode == 0x3) { // state change，魔方状态改变（转动事件）
 			sendMessage(msg.slice(2, 7));//向魔方回应一条消息：sendMessage(msg.slice(2,7))（通常是握手回应）,回应一下魔方以保持连接心跳
-			console.log("当前旋转动作：",[msg[34]);
+			console.log("当前旋转动作：",msg[34]);
 		
 		
 		

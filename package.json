@@ -1,0 +1,6 @@
+{
+  "type": "commonjs",
+  "dependencies": {
+    "webbluetooth": "^3.3.2"
+  }
+}

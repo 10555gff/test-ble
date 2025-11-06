@@ -1,0 +1,12 @@
+{
+	"main": "index.html",
+	"logo": "logo.png",
+	"preload": "preload.js",
+	"features": [
+		{
+		  "code": "魔方CFOP",
+		  "explain": "用于练习魔方CFOP公式",
+			"cmds":["魔方","CFOP", "魔方练习"]
+		}
+	]
+}

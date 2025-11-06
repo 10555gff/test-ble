@@ -7,7 +7,7 @@ window.deviceAPI = {
 };
  
  
-
+var _gatt;
 var _chrct_cube;
 var UUID_SUFFIX = '-0000-1000-8000-00805f9b34fb';
 var SERVICE_UUID = '0000fff0' + UUID_SUFFIX;
@@ -19,6 +19,7 @@ var KEYS = ['NoDg7ANAjGkEwBYCc0xQnADAVgkzGAzHNAGyRTanQi5QIFyHrjQMQgsC6QA'];
  
 
 async function startConnet() {
+	clear();
 	try{
 		console.log("开始连接");
 	
@@ -32,11 +33,11 @@ async function startConnet() {
 		console.log('设备:', device.name);
 	
 		// 2. 连接 GATT 服务
-		const server = await device.gatt.connect();
+		_gatt = await device.gatt.connect();
 		console.log('已连接 GATT Server');
 	
 		// 3. 获取 Service
-		const service = await server.getPrimaryService(SERVICE_UUID);
+		const service = await _gatt.getPrimaryService(SERVICE_UUID);
 		console.log('service:\n',service);
 	
 		// 4. 获取 Characteristic
@@ -142,58 +143,55 @@ function sendMessage(content) {
 	parseCubeData(msg);
   }
 
-//   //数据处理函数
-//   function onCubeEvent(event) {
-//     console.log("aaaaaaaaaaaaaaaa");
- 
-//   }
-
 
 
 function parseCubeData(msg) {
-		if (msg[0] != 0xfe) {
-			console.log('[qiyicube] error cube data', msg);
-		}
-		var opcode = msg[2];
-		var ts = (msg[3] << 24 | msg[4] << 16 | msg[5] << 8 | msg[6]);
-		if (opcode == 0x2) { // cube hello，不加这个会直报
-			batteryLevel = msg[35];
-			sendMessage(msg.slice(2, 7));
+	if (msg[0] != 0xfe) {
+		console.log('[qiyicube] error cube data', msg);
+	}
+	var opcode = msg[2];
+	var ts = (msg[3] << 24 | msg[4] << 16 | msg[5] << 8 | msg[6]);
+	if (opcode == 0x2) { // cube hello，不加这个会直报
+		batteryLevel = msg[35];
+		sendMessage(msg.slice(2, 7));
 
-			//初始化魔方
-			//var newFacelet = parseFacelet(msg.slice(7, 34));
-			//GiikerCube.callback(newFacelet, [], [Math.trunc(ts / 1.6), locTime], _deviceName);
-			//prevCubie.fromFacelet(newFacelet);
-			// if (newFacelet != kernel.getProp('giiSolved', mathlib.SOLVED_FACELET)) {
-			// 	var rst = kernel.getProp('giiRST');
-			// 	if (rst == 'a' || rst == 'p' && confirm(CONFIRM_GIIRST)) {
-			// 		giikerutil.markSolved();
-			// 	}
-			// }
-		} 
-		else if (opcode == 0x3) { // state change，魔方状态改变
-			sendMessage(msg.slice(2, 7));
-			console.log("当前旋转动作：",msg[34]);
+		//初始化魔方
+		//var newFacelet = parseFacelet(msg.slice(7, 34));
+		//GiikerCube.callback(newFacelet, [], [Math.trunc(ts / 1.6), locTime], _deviceName);
+		//prevCubie.fromFacelet(newFacelet);
+		// if (newFacelet != kernel.getProp('giiSolved', mathlib.SOLVED_FACELET)) {
+		// 	var rst = kernel.getProp('giiRST');
+		// 	if (rst == 'a' || rst == 'p' && confirm(CONFIRM_GIIRST)) {
+		// 		giikerutil.markSolved();
+		// 	}
+		// }
+	} 
+	else if (opcode == 0x3) { // state change，魔方状态改变
+		sendMessage(msg.slice(2, 7));
+		console.log("当前旋转动作：",msg[34]);
 
-		}
+	}
 }
 
 
-	function clear() {
-		var result = Promise.resolve();
-		if (_chrct_cube) {
-			_chrct_cube.removeEventListener('characteristicvaluechanged', onCubeEvent);
-			result = _chrct_cube.stopNotifications().catch($.noop);
-			_chrct_cube = null;
-		}
-		// _service = null;
-		// _gatt = null;
-		// _deviceName = null;
-		// deviceMac = null;
-		// curCubie = new mathlib.CubieCube();
-		// prevCubie = new mathlib.CubieCube();
-		// prevMoves = [];
-		// lastTs = 0;
-		// batteryLevel = 0;
-		return result;
-	}
+
+
+function clear() {
+    let result = Promise.resolve();
+
+    if (_chrct_cube) {
+        _chrct_cube.removeEventListener('characteristicvaluechanged', onCubeEvent);
+		result = _chrct_cube.stopNotifications().catch($.noop);
+		_chrct_cube = null;
+    }
+
+    // 关键：断开 GATT
+    if (_gatt?.connected) {
+        _gatt.disconnect();
+    }
+
+    // 清理引用
+     _gatt = null;
+
+    return result;
+}
